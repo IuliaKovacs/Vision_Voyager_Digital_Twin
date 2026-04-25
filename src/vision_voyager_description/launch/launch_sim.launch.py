@@ -48,7 +48,10 @@ def generate_launch_description():
     arguments=[
         '/cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist',
         '/clock@rosgraph_msgs/msg/Clock@gz.msgs.Clock',
-        '/ultrasonic/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan'
+        '/ultrasonic/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan',
+        '/line_follower/left@sensor_msgs/msg/Image[gz.msgs.Image',
+        '/line_follower/center@sensor_msgs/msg/Image[gz.msgs.Image',
+        '/line_follower/right@sensor_msgs/msg/Image[gz.msgs.Image'
     ],
     output='screen'
     )

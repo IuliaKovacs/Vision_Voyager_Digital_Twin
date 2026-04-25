@@ -11,6 +11,7 @@
   <material name="blue"><color rgba="0.1 0.4 0.8 1"/></material>
   <material name="black"><color rgba="0.05 0.05 0.05 1"/></material>
   <material name="grey"><color rgba="0.5 0.5 0.5 1"/></material>
+  <material name="red"><color rgba="0.8 0.1 0.1 1"/></material>
 
   <link name="base_footprint"/>
 
@@ -53,6 +54,29 @@
     <child link="ultrasonic_link"/>
     <origin xyz="0.08 0 0.03" rpy="0 0 0"/>
   </joint>
+
+  <xacro:macro name="line_follower_link" params="prefix y_off">
+    <link name="line_follower_${prefix}">
+      <visual>
+        <geometry><box size="0.01 0.01 0.005"/></geometry>
+        <material name="red"/>
+      </visual>
+      <inertial>
+        <mass value="0.001"/>
+        <inertia ixx="1e-7" ixy="0" ixz="0" iyy="1e-7" iyz="0" izz="1e-7"/>
+      </inertial>
+    </link>
+
+    <joint name="line_follower_${prefix}_joint" type="fixed">
+      <parent link="chassis"/>
+      <child link="line_follower_${prefix}"/>
+      <origin xyz="0.075 ${y_off} -0.005" rpy="0 ${pi/2} 0"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:line_follower_link prefix="left"   y_off="0.02"/>
+  <xacro:line_follower_link prefix="center" y_off="0.0"/>
+  <xacro:line_follower_link prefix="right"  y_off="-0.02"/>
 
   <xacro:macro name="rear_wheel" params="prefix y_reflect">
     <link name="rear_${prefix}_wheel">
@@ -126,9 +150,7 @@
       <wheel_radius>${wheel_radius}</wheel_radius>
       <topic>cmd_vel</topic>
     </plugin>
-
-    <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher"/>
-    
+      <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher"/>
     <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
       <render_engine>ogre2</render_engine>
     </plugin>
@@ -158,5 +180,30 @@
       </ray>
     </sensor>
   </gazebo>
+
+  <xacro:macro name="line_follower_gz" params="prefix">
+    <gazebo reference="line_follower_${prefix}">
+      <sensor name="line_follower_${prefix}" type="camera">
+        <gz_frame_id>line_follower_${prefix}</gz_frame_id>
+        <always_on>true</always_on>
+        <update_rate>30</update_rate>
+        <visualize>true</visualize>
+        <topic>/line_follower/${prefix}</topic>
+        <camera>
+          <horizontal_fov>0.1</horizontal_fov>
+          <image>
+            <width>1</width>
+            <height>1</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip><near>0.001</near><far>0.10</far></clip>
+        </camera>
+      </sensor>
+    </gazebo>
+  </xacro:macro>
+
+  <xacro:line_follower_gz prefix="left"/>
+  <xacro:line_follower_gz prefix="center"/>
+  <xacro:line_follower_gz prefix="right"/>
 
 </robot>
