@@ -35,6 +35,44 @@
     </inertial>
   </link>
 
+  <link name="pan_link">
+    <visual>
+      <geometry><box size="0.03 0.03 0.03"/></geometry>
+      <material name="grey"/>
+    </visual>
+    <inertial>
+      <mass value="0.05"/>
+      <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="1e-5"/>
+    </inertial>
+  </link>
+
+  <joint name="pan_joint" type="revolute">
+    <parent link="chassis"/>
+    <child link="pan_link"/>
+    <origin xyz="0.04 0 0.02" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-1.57" upper="1.57" effort="1.0" velocity="1.0"/>
+  </joint>
+
+  <link name="tilt_link">
+    <visual>
+      <geometry><box size="0.02 0.03 0.02"/></geometry>
+      <material name="blue"/>
+    </visual>
+    <inertial>
+      <mass value="0.05"/>
+      <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="1e-5"/>
+    </inertial>
+  </link>
+
+  <joint name="tilt_joint" type="revolute">
+    <parent link="pan_link"/>
+    <child link="tilt_link"/>
+    <origin xyz="0.01 0 0.025" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.78" upper="0.78" effort="1.0" velocity="1.0"/>
+  </joint>
+
   <link name="ultrasonic_link">
     <visual>
       <geometry><box size="0.02 0.05 0.02"/></geometry>
@@ -66,7 +104,7 @@
         <inertia ixx="1e-7" ixy="0" ixz="0" iyy="1e-7" iyz="0" izz="1e-7"/>
       </inertial>
     </link>
-
+    
     <joint name="line_follower_${prefix}_joint" type="fixed">
       <parent link="chassis"/>
       <child link="line_follower_${prefix}"/>
@@ -150,9 +188,18 @@
       <wheel_radius>${wheel_radius}</wheel_radius>
       <topic>cmd_vel</topic>
     </plugin>
-      <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher"/>
+    <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher"/>
     <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
       <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>pan_joint</joint_name>
+      <topic>/model/vision_voyager/joint/pan_joint/cmd_pos</topic>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>tilt_joint</joint_name>
+      <topic>/model/vision_voyager/joint/tilt_joint/cmd_pos</topic>
     </plugin>
   </gazebo>
 

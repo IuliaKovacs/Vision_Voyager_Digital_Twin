@@ -51,7 +51,9 @@ def generate_launch_description():
         '/ultrasonic/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan',
         '/line_follower/left@sensor_msgs/msg/Image[gz.msgs.Image',
         '/line_follower/center@sensor_msgs/msg/Image[gz.msgs.Image',
-        '/line_follower/right@sensor_msgs/msg/Image[gz.msgs.Image'
+        '/line_follower/right@sensor_msgs/msg/Image[gz.msgs.Image',
+        '/model/vision_voyager/joint/pan_joint/cmd_pos@std_msgs/msg/Float64]gz.msgs.Double',
+        '/model/vision_voyager/joint/tilt_joint/cmd_pos@std_msgs/msg/Float64]gz.msgs.Double'
     ],
     output='screen'
     )
