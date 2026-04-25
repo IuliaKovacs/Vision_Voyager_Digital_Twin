@@ -1,45 +1,61 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 import xacro
 
 def generate_launch_description():
-
-    # Numele pachetului
-    package_name='vision_voyager_description'
-
-    # Procesăm fișierul XACRO pentru a obține URDF
-    pkg_path = os.path.join(get_package_share_directory(package_name))
-    xacro_file = os.path.join(pkg_path,'urdf','vision_voyager.urdf.xacro')
-    robot_description_config = xacro.process_file(xacro_file)
+    # 1. Configurații și Căi
+    pkg_name = 'vision_voyager_description'
     
-    # Node: Robot State Publisher (publică structura robotului)
-    params = {'robot_description': robot_description_config.toxml(), 'use_sim_time': True}
+    xacro_file = os.path.join(get_package_share_directory(pkg_name), 'urdf', 'vision_voyager.urdf.xacro')
+    robot_description_raw = xacro.process_file(xacro_file).toxml()
+
+    # 2. Nod: Robot State Publisher (Publică structura robotului)
     node_robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
         output='screen',
-        parameters=[params]
+        parameters=[{
+            'robot_description': robot_description_raw,
+            'use_sim_time': True
+        }]
     )
 
-    # Gazebo (pornire server și client)
+    # 3. Gazebo Sim (Lansare simulator)
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory('gazebo_ros'), 'launch', 'gazebo.launch.py')]),
+            get_package_share_directory('ros_gz_sim'), 'launch', 'gz_sim.launch.py')]),
+        launch_arguments={'gz_args': '-r empty.sdf'}.items(), # -r pornește automat simularea (Auto-Play)
     )
 
-    # Node: Spawn Entity (pune robotul în Gazebo)
-    spawn_entity = Node(package='gazebo_ros', executable='spawn_entity.py',
-                        arguments=['-topic', 'robot_description',
-                                   '-entity', 'vision_voyager'],
-                        output='screen')
+    # 4. Nod: Spawn Robot (Pune robotul în Gazebo)
+    spawn_entity = Node(
+        package='ros_gz_sim',
+        executable='create',
+        arguments=['-topic', 'robot_description', '-name', 'vision_voyager', '-z', '0.1'],
+        output='screen'
+    )
 
-    # Lansăm totul
+    # 5. Nod: ROS-GZ Bridge (Puntea pentru comenzi)
+    # Acesta conectează topicul ROS 2 (/cmd_vel) cu cel de Gazebo
+    bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        arguments=[
+            '/cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist',
+            '/model/vision_voyager/joint_state@sensor_msgs/msg/JointState@gz.msgs.Model',
+            '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'
+        ],
+        output='screen'
+    )
+
     return LaunchDescription([
         node_robot_state_publisher,
         gazebo,
         spawn_entity,
+        bridge
     ])
