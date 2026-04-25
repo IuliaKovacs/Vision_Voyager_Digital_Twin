@@ -43,15 +43,16 @@ def generate_launch_description():
     # 5. Nod: ROS-GZ Bridge (Puntea pentru comenzi)
     # Acesta conectează topicul ROS 2 (/cmd_vel) cu cel de Gazebo
     bridge = Node(
-        package='ros_gz_bridge',
-        executable='parameter_bridge',
-        arguments=[
-            '/cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist',
-            '/model/vision_voyager/joint_state@sensor_msgs/msg/JointState@gz.msgs.Model',
-            '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'
-        ],
-        output='screen'
+    package='ros_gz_bridge',
+    executable='parameter_bridge',
+    arguments=[
+        '/cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist',
+        '/clock@rosgraph_msgs/msg/Clock@gz.msgs.Clock',
+        '/ultrasonic/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan'
+    ],
+    output='screen'
     )
+
 
     return LaunchDescription([
         node_robot_state_publisher,
