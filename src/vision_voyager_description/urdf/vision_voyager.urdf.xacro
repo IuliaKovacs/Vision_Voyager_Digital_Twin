@@ -23,8 +23,10 @@
 
   <link name="chassis">
     <visual>
-      <geometry><box size="0.16 0.09 0.01"/></geometry>
-      <material name="blue"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/> 
+      <geometry>
+        <mesh filename="package://vision_voyager_description/3d_mesh_models/3D_vv_chassis.obj" scale="1 1 1"/>
+      </geometry>
     </visual>
     <collision>
       <geometry><box size="0.16 0.09 0.01"/></geometry>
@@ -104,7 +106,7 @@
         <inertia ixx="1e-7" ixy="0" ixz="0" iyy="1e-7" iyz="0" izz="1e-7"/>
       </inertial>
     </link>
-    
+
     <joint name="line_follower_${prefix}_joint" type="fixed">
       <parent link="chassis"/>
       <child link="line_follower_${prefix}"/>
@@ -116,11 +118,17 @@
   <xacro:line_follower_link prefix="center" y_off="0.0"/>
   <xacro:line_follower_link prefix="right"  y_off="-0.02"/>
 
+  <xacro:macro name="wheel_geometry">
+    <geometry>
+      <mesh filename="package://vision_voyager_description/3d_mesh_models/vv_wheel.obj" scale="1 1 1"/>
+    </geometry>
+  </xacro:macro>
+
   <xacro:macro name="rear_wheel" params="prefix y_reflect">
     <link name="rear_${prefix}_wheel">
       <visual>
-        <origin rpy="${pi/2} 0 0" xyz="0 0 0"/>
-        <geometry><cylinder radius="${wheel_radius}" length="${wheel_width}"/></geometry>
+        <origin rpy="0 ${pi/2} ${(1 - y_reflect) * pi / 2}" xyz="0 0 0"/>
+        <xacro:wheel_geometry/>
         <material name="black"/>
       </visual>
       <collision>
@@ -153,8 +161,8 @@
     </joint>
     <link name="front_${prefix}_wheel">
       <visual>
-        <origin rpy="${pi/2} 0 0" xyz="0 0 0"/>
-        <geometry><cylinder radius="${wheel_radius}" length="${wheel_width}"/></geometry>
+        <origin rpy="0 ${pi/2} ${(1 - y_reflect) * pi / 2}" xyz="0 0 0"/>
+        <xacro:wheel_geometry/>
         <material name="black"/>
       </visual>
       <collision>
@@ -252,5 +260,45 @@
   <xacro:line_follower_gz prefix="left"/>
   <xacro:line_follower_gz prefix="center"/>
   <xacro:line_follower_gz prefix="right"/>
+
+
+  <xacro:macro name="wheel_gazebo_material" params="prefix side">
+    <gazebo reference="${prefix}_${side}_wheel">
+      <visual>
+        <material>
+          <pbr>
+            <metal>
+              <albedo_map>package://vision_voyager_description/3d_mesh_models/vv_wheel.png</albedo_map>
+              <roughness>0.6</roughness>
+              <metalness>0.1</metalness>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+    </gazebo>
+  </xacro:macro>
+
+  <xacro:wheel_gazebo_material prefix="front" side="left"/>
+  <xacro:wheel_gazebo_material prefix="front" side="right"/>
+  <xacro:wheel_gazebo_material prefix="rear" side="left"/>
+  <xacro:wheel_gazebo_material prefix="rear" side="right"/>
+
+  <gazebo reference="chassis">
+      <visual>
+          <material>
+              <ambient>1 1 1 1</ambient>
+              <diffuse>1 1 1 1</diffuse>
+              <specular>0.5 0.5 0.5 1</specular>
+              <pbr>
+                  <metal>
+                      <albedo_map>package://vision_voyager_description/3d_mesh_models/chassis_Texture.png</albedo_map>
+                  </metal>
+              </pbr>
+          </material>
+      </visual>
+  </gazebo>
+
+
+
 
 </robot>
