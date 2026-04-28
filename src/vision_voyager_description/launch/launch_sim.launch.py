@@ -61,7 +61,8 @@ def generate_launch_description():
         '/line_follower/center@sensor_msgs/msg/Image[gz.msgs.Image',
         '/line_follower/right@sensor_msgs/msg/Image[gz.msgs.Image',
         '/model/vision_voyager/joint/pan_joint/cmd_pos@std_msgs/msg/Float64]gz.msgs.Double',
-        '/model/vision_voyager/joint/tilt_joint/cmd_pos@std_msgs/msg/Float64]gz.msgs.Double'
+        '/model/vision_voyager/joint/tilt_joint/cmd_pos@std_msgs/msg/Float64]gz.msgs.Double',
+        '/camera/image_raw@sensor_msgs/msg/Image[gz.msgs.Image'
     ],
     output='screen'
     )
