@@ -13,6 +13,8 @@ def generate_launch_description():
     
     xacro_file = os.path.join(get_package_share_directory(pkg_name), 'urdf', 'vision_voyager.urdf.xacro')
     robot_description_raw = xacro.process_file(xacro_file).toxml()
+    pkg_description = get_package_share_directory('vision_voyager_description')
+    world_file = os.path.join(pkg_description, 'worlds', 'world_with_objects.world')
 
     # 2. Nod: Robot State Publisher (Publică structura robotului)
     node_robot_state_publisher = Node(
@@ -29,7 +31,7 @@ def generate_launch_description():
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
             get_package_share_directory('ros_gz_sim'), 'launch', 'gz_sim.launch.py')]),
-        launch_arguments={'gz_args': '-r empty.sdf'}.items(), # -r pornește automat simularea (Auto-Play)
+        launch_arguments={'gz_args': [f'-r ', world_file]}.items(),
     )
 
     # 4. Nod: Spawn Robot (Pune robotul în Gazebo)
