@@ -21,7 +21,7 @@
 
     <model name="line_follower_track">
       <static>true</static>
-      <pose>0 -0.54 0.005 0 0 0</pose> 
+      <pose>-0.28 -0.54 0.005 0 0 0</pose> 
       <link name="link">
         <visual name="visual">
           <cast_shadows>false</cast_shadows> <geometry>
