@@ -1,14 +1,41 @@
 <?xml version="1.0" ?>
 <sdf version="1.8">
   <world name="default">
+    
     <include>
       <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Sun</uri>
     </include>
+
     <include>
       <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Ground Plane</uri>
     </include>
 
-    <model name="red_box">
+    <model name="line_follower_track">
+      <static>true</static>
+      <pose>0 -0.54 0.005 0 0 0</pose> 
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>10 10</size> </plane>
+          </geometry>
+          <material>
+            <diffuse>1 1 1 1</diffuse>
+            <specular>0 0 0 1</specular>
+            <pbr>
+              <metal>
+                <albedo_map>/home/kovaiu/Vision_Voyager_Digital_Twin/src/vision_voyager_description/worlds/black_line.png</albedo_map>
+                <roughness>0.6</roughness>
+                <metalness>0</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+  </model>
+
+ <model name="red_box">
       <pose>2.0 0 0.5 0 0 0</pose>
       <link name="link">
         <collision name="collision">
@@ -26,7 +53,7 @@
     </model>
 
     <model name="green_cylinder">
-      <pose>1.0 2.0 0.5 0 0 0</pose>
+      <pose>1.0 2.56 0.5 0 0 0</pose>
       <link name="link">
         <collision name="collision">
           <geometry><cylinder><radius>0.5</radius><length>1.0</length></cylinder></geometry>
