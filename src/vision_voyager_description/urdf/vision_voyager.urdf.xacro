@@ -178,7 +178,7 @@
       <child link="front_${prefix}_steer_link"/>
       <origin xyz="${wheelbase/2} ${y_reflect * track_width/2} 0" rpy="0 0 0"/>
       <axis xyz="0 0 1"/>
-      <limit lower="-0.52" upper="0.52" effort="5.0" velocity="1.0"/>
+      <limit lower="-0.52" upper="0.52" effort="10.0" velocity="20.0"/>
     </joint>
     <link name="front_${prefix}_wheel">
       <visual>
@@ -302,7 +302,6 @@
   <xacro:line_follower_gz prefix="center"/>
   <xacro:line_follower_gz prefix="right"/>
 
-
   <xacro:macro name="wheel_gazebo_material" params="prefix side">
     <gazebo reference="${prefix}_${side}_wheel">
       <visual>
@@ -338,8 +337,5 @@
           </material>
       </visual>
   </gazebo>
-
-
-
 
 </robot>
