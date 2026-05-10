@@ -2,9 +2,18 @@
 <sdf version="1.8">
   <world name="default">
     
-    <include>
-      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Sun</uri>
-    </include>
+    <scene>
+      <shadows>false</shadows>
+      <ambient>0.6 0.6 0.6 1.0</ambient> <grid>false</grid>
+    </scene>
+
+    <light type="directional" name="sun">
+      <cast_shadows>false</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
 
     <include>
       <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Ground Plane</uri>
@@ -15,10 +24,11 @@
       <pose>0 -0.54 0.005 0 0 0</pose> 
       <link name="link">
         <visual name="visual">
-          <geometry>
+          <cast_shadows>false</cast_shadows> <geometry>
             <plane>
               <normal>0 0 1</normal>
-              <size>10 10</size> </plane>
+              <size>10 10</size>
+            </plane>
           </geometry>
           <material>
             <diffuse>1 1 1 1</diffuse>
@@ -33,8 +43,8 @@
           </material>
         </visual>
       </link>
-  </model>
-
+    </model>
+    
  <model name="red_box">
       <pose>2.0 0 0.5 0 0 0</pose>
       <link name="link">
