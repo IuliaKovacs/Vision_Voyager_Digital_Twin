@@ -1,0 +1,145 @@
+import os
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import IncludeLaunchDescription, GroupAction, SetEnvironmentVariable, TimerAction
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch_ros.actions import Node, PushRosNamespace
+import xacro
+
+def generate_launch_description():
+    pkg_name = 'vision_voyager_description'
+    pkg_share = get_package_share_directory(pkg_name)
+    
+    # Încărcăm cele două fișiere URDF unice pentru a izola ID-urile de senzori
+    xacro_file_1 = os.path.join(pkg_share, 'urdf', 'vision_voyager_1.urdf.xacro')
+    xacro_file_2 = os.path.join(pkg_share, 'urdf', 'vision_voyager_2.urdf.xacro')
+    
+    robot_description_raw_1 = xacro.process_file(xacro_file_1).toxml()
+    robot_description_raw_2 = xacro.process_file(xacro_file_2).toxml()
+    
+    world_file = os.path.join(pkg_share, 'worlds', 'world_with_objects.world')
+
+    # Setează motorul grafic modern din mediul global
+    set_gazebo_engine = SetEnvironmentVariable(name='GZ_RENDERING_ENGINE', value='ogre2')
+
+    gazebo = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(
+            get_package_share_directory('ros_gz_sim'), 'launch', 'gz_sim.launch.py')]),
+        launch_arguments={'gz_args': f'-r {world_file}'}.items(),
+    )
+
+    # ROBOT 1
+    robot1_nodes = GroupAction(
+        actions=[
+            PushRosNamespace('robot1'),
+            Node(
+                package='robot_state_publisher',
+                executable='robot_state_publisher',
+                output='screen',
+                parameters=[{
+                    'robot_description': robot_description_raw_1,
+                    'use_sim_time': True,
+                    'frame_prefix': 'robot1/'
+                }]
+            ),
+            Node(
+                package='ros_gz_sim',
+                executable='create',
+                arguments=[
+                    '-topic', 'robot_description', 
+                    '-name', 'robot1',
+                    '-x', '0.0', '-y', '0.0', '-z', '0.1'
+                ],
+                output='screen'
+            ),
+            Node(
+                package='ros_gz_bridge',
+                executable='parameter_bridge',
+                arguments=[
+                    '/model/robot1/cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist',
+                    '/clock@rosgraph_msgs/msg/Clock@gz.msgs.Clock',
+                    '/model/robot1/ultrasonic/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan',
+                    '/model/robot1/line_follower/left@sensor_msgs/msg/Image[gz.msgs.Image',
+                    '/model/robot1/line_follower/center@sensor_msgs/msg/Image[gz.msgs.Image',
+                    '/model/robot1/line_follower/right@sensor_msgs/msg/Image[gz.msgs.Image',
+                    '/model/robot1/joint/pan_joint/cmd_pos@std_msgs/msg/Float64]gz.msgs.Double',
+                    '/model/robot1/joint/tilt_joint/cmd_pos@std_msgs/msg/Float64]gz.msgs.Double',
+                    '/model/robot1/camera/image_raw@sensor_msgs/msg/Image[gz.msgs.Image'
+                ],
+                output='screen',
+                remappings=[
+                    ('/model/robot1/cmd_vel', '/robot1/cmd_vel'),
+                    ('/model/robot1/ultrasonic/scan', '/robot1/ultrasonic/scan'),
+                    ('/model/robot1/line_follower/left', '/robot1/line_follower/left'),
+                    ('/model/robot1/line_follower/center', '/robot1/line_follower/center'),
+                    ('/model/robot1/line_follower/right', '/robot1/line_follower/right'),
+                    ('/model/robot1/joint/pan_joint/cmd_pos', '/robot1/joint/pan_joint/cmd_pos'),
+                    ('/model/robot1/joint/tilt_joint/cmd_pos', '/robot1/joint/tilt_joint/cmd_pos'),
+                    ('/model/robot1/camera/image_raw', '/robot1/camera/image_raw'),
+                ]
+            )
+        ]
+    )
+
+    # ROBOT 2
+    robot2_nodes = GroupAction(
+        actions=[
+            PushRosNamespace('robot2'),
+            Node(
+                package='robot_state_publisher',
+                executable='robot_state_publisher',
+                output='screen',
+                parameters=[{
+                    'robot_description': robot_description_raw_2,
+                    'use_sim_time': True,
+                    'frame_prefix': 'robot2/'
+                }]
+            ),
+            Node(
+                package='ros_gz_sim',
+                executable='create',
+                arguments=[
+                    '-topic', 'robot_description', 
+                    '-name', 'robot2',
+                    '-x', '1.5', '-y', '0.0', '-z', '0.1'
+                ],
+                output='screen'
+            ),
+            Node(
+                package='ros_gz_bridge',
+                executable='parameter_bridge',
+                arguments=[
+                    '/model/robot2/cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist',
+                    '/clock@rosgraph_msgs/msg/Clock@gz.msgs.Clock',
+                    '/model/robot2/ultrasonic/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan',
+                    '/model/robot2/line_follower/left@sensor_msgs/msg/Image[gz.msgs.Image',
+                    '/model/robot2/line_follower/center@sensor_msgs/msg/Image[gz.msgs.Image',
+                    '/model/robot2/line_follower/right@sensor_msgs/msg/Image[gz.msgs.Image',
+                    '/model/robot2/joint/pan_joint/cmd_pos@std_msgs/msg/Float64]gz.msgs.Double',
+                    '/model/robot2/joint/tilt_joint/cmd_pos@std_msgs/msg/Float64]gz.msgs.Double',
+                    '/model/robot2/camera/image_raw@sensor_msgs/msg/Image[gz.msgs.Image'
+                ],
+                output='screen',
+                remappings=[
+                    ('/model/robot2/cmd_vel', '/robot2/cmd_vel'),
+                    ('/model/robot2/ultrasonic/scan', '/robot2/ultrasonic/scan'),
+                    ('/model/robot2/line_follower/left', '/robot2/line_follower/left'),
+                    ('/model/robot2/line_follower/center', '/robot2/line_follower/center'),
+                    ('/model/robot2/line_follower/right', '/robot2/line_follower/right'),
+                    ('/model/robot2/joint/pan_joint/cmd_pos', '/robot2/joint/pan_joint/cmd_pos'),
+                    ('/model/robot2/joint/tilt_joint/cmd_pos', '/robot2/joint/tilt_joint/cmd_pos'),
+                    ('/model/robot2/camera/image_raw', '/robot2/camera/image_raw'),
+                ]
+            )
+        ]
+    )
+
+    return LaunchDescription([
+        set_gazebo_engine,
+        gazebo,
+        robot1_nodes,
+        TimerAction(
+            period=5.0,
+            actions=[robot2_nodes]
+        )
+    ])

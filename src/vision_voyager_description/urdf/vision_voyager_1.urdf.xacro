@@ -1,0 +1,339 @@
+<?xml version="1.0"?>
+<robot name="robot1" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:property name="chassis_mass" value="0.8"/>
+  <xacro:property name="wheel_mass" value="0.1"/>
+  <xacro:property name="wheel_radius" value="0.032"/>
+  <xacro:property name="wheel_width" value="0.015"/>
+  <xacro:property name="wheelbase" value="0.12"/>
+  <xacro:property name="track_width" value="0.1"/>
+
+  <material name="blue"><color rgba="0.1 0.4 0.8 1"/></material>
+  <material name="black"><color rgba="0.05 0.05 0.05 1"/></material>
+  <material name="grey"><color rgba="0.5 0.5 0.5 1"/></material>
+  <material name="red"><color rgba="0.8 0.1 0.1 1"/></material>
+
+  <link name="base_footprint"/>
+
+  <joint name="base_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="chassis"/>
+    <origin xyz="0 0 ${wheel_radius}" rpy="0 0 0"/>
+  </joint>
+
+  <link name="chassis">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/> 
+      <geometry>
+        <mesh filename="package://vision_voyager_description/3d_mesh_models/chassis.obj" scale="1 1 1"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry><box size="0.16 0.09 0.01"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="${chassis_mass}"/>
+      <inertia ixx="0.00054" ixy="0" ixz="0" iyy="0.00171" iyz="0" izz="0.00224"/>
+    </inertial>
+  </link>
+
+  <link name="pan_link">
+    <visual>
+      <geometry><box size="0.03 0.03 0.03"/></geometry>
+      <material name="grey"/>
+    </visual>
+    <inertial>
+      <mass value="0.05"/>
+      <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="1e-5"/>
+    </inertial>
+  </link>
+
+  <joint name="pan_joint" type="revolute">
+    <parent link="chassis"/>
+    <child link="pan_link"/>
+    <origin xyz="0.04 0 0.02" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-1.57" upper="1.57" effort="1.0" velocity="1.0"/>
+  </joint>
+
+  <link name="tilt_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://vision_voyager_description/3d_mesh_models/head_tilt.obj" scale="1 1 1"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="0.05"/>
+      <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="1e-5"/>
+    </inertial>
+  </link>
+
+  <joint name="tilt_joint" type="revolute">
+    <parent link="pan_link"/>
+    <child link="tilt_link"/>
+    <origin xyz="0.01 0 0.025" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.78" upper="0.78" effort="1.0" velocity="1.0"/>
+  </joint>
+
+  <link name="camera_link">
+    <visual>
+      <geometry><box size="0.02 0.02 0.02"/></geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <geometry><box size="0.02 0.02 0.02"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="1e-5"/>
+    </inertial>
+  </link>
+
+  <joint name="camera_joint" type="fixed">
+    <parent link="tilt_link"/>
+    <child link="camera_link"/>
+    <origin xyz="0.05 0 0.02" rpy="0 0 0"/>
+  </joint>
+
+  <link name="ultrasonic_link">
+    <visual>
+      <geometry><box size="0.02 0.05 0.02"/></geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <geometry><box size="0.02 0.05 0.02"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="1e-5"/>
+    </inertial>
+  </link>
+
+  <joint name="ultrasonic_joint" type="fixed">
+    <parent link="chassis"/>
+    <child link="ultrasonic_link"/>
+    <origin xyz="0.08 0 0.03" rpy="0 0 0"/>
+  </joint>
+
+  <xacro:macro name="line_follower_link" params="prefix y_off">
+    <link name="line_follower_${prefix}">
+      <visual>
+        <geometry><box size="0.01 0.01 0.005"/></geometry>
+        <material name="red"/>
+      </visual>
+      <inertial>
+        <mass value="0.001"/>
+        <inertia ixx="1e-7" ixy="0" ixz="0" iyy="1e-7" iyz="0" izz="1e-7"/>
+      </inertial>
+    </link>
+
+    <joint name="line_follower_${prefix}_joint" type="fixed">
+      <parent link="chassis"/>
+      <child link="line_follower_${prefix}"/>
+      <origin xyz="0.075 ${y_off} -0.005" rpy="0 ${pi/2} 0"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:line_follower_link prefix="left"   y_off="0.02"/>
+  <xacro:line_follower_link prefix="center" y_off="0.0"/>
+  <xacro:line_follower_link prefix="right"  y_off="-0.02"/>
+
+  <xacro:macro name="wheel_geometry">
+    <geometry>
+      <mesh filename="package://vision_voyager_description/3d_mesh_models/vv_wheel.obj" scale="1 1 1"/>
+    </geometry>
+  </xacro:macro>
+
+  <xacro:macro name="rear_wheel" params="prefix y_reflect">
+    <link name="rear_${prefix}_wheel">
+      <visual>
+        <origin rpy="0 ${pi/2} ${(1 - y_reflect) * pi / 2}" xyz="0 0 0"/>
+        <xacro:wheel_geometry/>
+        <material name="black"/>
+      </visual>
+      <collision>
+        <origin rpy="${pi/2} 0 0" xyz="0 0 0"/>
+        <geometry><cylinder radius="${wheel_radius}" length="${wheel_width}"/></geometry>
+      </collision>
+      <inertial>
+        <mass value="${wheel_mass}"/>
+        <inertia ixx="0.00003" ixy="0" ixz="0" iyy="0.00003" iyz="0" izz="0.00005"/>
+      </inertial>
+    </link>
+    <joint name="rear_${prefix}_wheel_joint" type="continuous">
+      <parent link="chassis"/>
+      <child link="rear_${prefix}_wheel"/>
+      <origin xyz="-${wheelbase/2} ${y_reflect * track_width/2} 0" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:macro name="front_wheel" params="prefix y_reflect">
+    <link name="front_${prefix}_steer_link">
+      <inertial><mass value="0.01"/><inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/></inertial>
+    </link>
+    <joint name="front_${prefix}_steer_joint" type="revolute">
+      <parent link="chassis"/>
+      <child link="front_${prefix}_steer_link"/>
+      <origin xyz="${wheelbase/2} ${y_reflect * track_width/2} 0" rpy="0 0 0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="-0.52" upper="0.52" effort="10.0" velocity="20.0"/>
+    </joint>
+    <link name="front_${prefix}_wheel">
+      <visual>
+        <origin rpy="0 ${pi/2} ${(1 - y_reflect) * pi / 2}" xyz="0 0 0"/>
+        <xacro:wheel_geometry/>
+        <material name="black"/>
+      </visual>
+      <collision>
+        <origin rpy="${pi/2} 0 0" xyz="0 0 0"/>
+        <geometry><cylinder radius="${wheel_radius}" length="${wheel_width}"/></geometry>
+      </collision>
+      <inertial>
+        <mass value="${wheel_mass}"/>
+        <inertia ixx="0.00003" ixy="0" ixz="0" iyy="0.00003" iyz="0" izz="0.00005"/>
+      </inertial>
+    </link>
+    <joint name="front_${prefix}_wheel_joint" type="continuous">
+      <parent link="front_${prefix}_steer_link"/>
+      <child link="front_${prefix}_wheel"/>
+      <axis xyz="0 1 0"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:rear_wheel prefix="left" y_reflect="1"/>
+  <xacro:rear_wheel prefix="right" y_reflect="-1"/>
+  <xacro:front_wheel prefix="left" y_reflect="1"/>
+  <xacro:front_wheel prefix="right" y_reflect="-1"/>
+
+  <gazebo>
+    <plugin filename="gz-sim-ackermann-steering-system" name="gz::sim::systems::AckermannSteering">
+      <left_joint>rear_left_wheel_joint</left_joint>
+      <right_joint>rear_right_wheel_joint</right_joint>
+      <left_steering_joint>front_left_steer_joint</left_steering_joint>
+      <right_steering_joint>front_right_steer_joint</right_steering_joint>
+      <wheel_separation>${track_width}</wheel_separation>
+      <wheel_radius>${wheel_radius}</wheel_radius>
+      <topic>/model/robot1/cmd_vel</topic>
+    </plugin>
+    
+    <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher"/>
+
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>pan_joint</joint_name>
+      <topic>/model/robot1/joint/pan_joint/cmd_pos</topic>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>tilt_joint</joint_name>
+      <topic>/model/robot1/joint/tilt_joint/cmd_pos</topic>
+    </plugin>
+  </gazebo>
+
+  <gazebo reference="ultrasonic_link">
+    <sensor name="hc_sr04" type="gpu_lidar">
+      <gz_frame_id>robot1/ultrasonic_link</gz_frame_id>
+      <topic>/model/robot1/ultrasonic/scan</topic>
+      <always_on>true</always_on>
+      <update_rate>10</update_rate>
+      <visualize>false</visualize>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>3</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.15</min_angle>
+            <max_angle>0.15</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.05</min>
+          <max>3.0</max>
+          <resolution>0.01</resolution>
+        </range>
+      </ray>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="camera_link">
+    <sensor name="camera" type="camera">
+      <pose>0 0 0 0 0 0</pose>
+      <gz_frame_id>robot1/camera_link</gz_frame_id>
+      <topic>/model/robot1/camera/image_raw</topic>
+      <always_on>true</always_on>
+      <update_rate>15</update_rate>
+      <visualize>false</visualize>
+      <camera>
+        <horizontal_fov>1.047</horizontal_fov>
+        <image>
+          <width>320</width>
+          <height>240</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip><near>0.01</near><far>100</far></clip>
+      </camera>
+    </sensor>
+  </gazebo>
+
+  <xacro:macro name="line_follower_gz" params="prefix">
+    <gazebo reference="line_follower_${prefix}">
+      <sensor name="line_follower_${prefix}" type="camera">
+        <gz_frame_id>robot1/line_follower_${prefix}</gz_frame_id>
+        <always_on>true</always_on>
+        <update_rate>30</update_rate>
+        <visualize>false</visualize>
+        <topic>/model/robot1/line_follower/${prefix}</topic>
+        <camera>
+          <horizontal_fov>0.1</horizontal_fov>
+          <image>
+            <width>1</width>
+            <height>1</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip><near>0.001</near><far>0.10</far></clip>
+        </camera>
+      </sensor>
+    </gazebo>
+  </xacro:macro>
+
+  <xacro:line_follower_gz prefix="left"/>
+  <xacro:line_follower_gz prefix="center"/>
+  <xacro:line_follower_gz prefix="right"/>
+
+  <xacro:macro name="wheel_gazebo_material" params="prefix side">
+    <gazebo reference="${prefix}_${side}_wheel">
+      <visual>
+        <material>
+          <pbr>
+            <metal>
+              <albedo_map>package://vision_voyager_description/3d_mesh_models/vv_wheel.png</albedo_map>
+              <roughness>0.6</roughness>
+              <metalness>0.1</metalness>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+    </gazebo>
+  </xacro:macro>
+
+  <xacro:wheel_gazebo_material prefix="front" side="left"/>
+  <xacro:wheel_gazebo_material prefix="front" side="right"/>
+  <xacro:wheel_gazebo_material prefix="rear" side="left"/>
+  <xacro:wheel_gazebo_material prefix="rear" side="right"/>
+
+  <gazebo reference="chassis">
+      <visual>
+          <material>
+              <ambient>1 1 1 1</ambient>
+              <diffuse>1 1 1 1</diffuse>
+              <specular>0.5 0.5 0.5 1</specular>
+              <pbr>
+                  <metal>
+                      <albedo_map>package://vision_voyager_description/3d_mesh_models/chassis_Texture.png</albedo_map>
+                  </metal>
+              </pbr>
+          </material>
+      </visual>
+  </gazebo>
+
+</robot>
