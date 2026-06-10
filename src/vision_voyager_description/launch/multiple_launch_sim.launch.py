@@ -20,7 +20,7 @@ def generate_launch_description():
     world_file = os.path.join(pkg_share, 'worlds', 'world_with_objects.world')
 
     # Setează motorul grafic modern din mediul global
-    set_gazebo_engine = SetEnvironmentVariable(name='GZ_RENDERING_ENGINE', value='ogre2')
+    set_gazebo_engine = SetEnvironmentVariable(name='GZ_RENDERING_ENGINE', value='ogre')
 
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
@@ -101,7 +101,7 @@ def generate_launch_description():
                 arguments=[
                     '-topic', 'robot_description', 
                     '-name', 'robot2',
-                    '-x', '1.5', '-y', '0.0', '-z', '0.1'
+                    '-x', '-1.0', '-y', '-3.12', '-z', '0.1'
                 ],
                 output='screen'
             ),
