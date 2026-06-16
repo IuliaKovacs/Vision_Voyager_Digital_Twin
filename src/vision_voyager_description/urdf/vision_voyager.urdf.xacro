@@ -233,7 +233,7 @@
     <sensor name="hc_sr04" type="gpu_lidar">
       <gz_frame_id>ultrasonic_link</gz_frame_id>
       <topic>/ultrasonic/scan</topic>
-      <always_on>true</always_on>
+      <always_on>false</always_on>
       <update_rate>10</update_rate>
       <visualize>false</visualize>
       <ray>
@@ -259,7 +259,7 @@
       <pose>0 0 0 0 0 0</pose>
       <gz_frame_id>camera_link</gz_frame_id>
       <topic>/camera/image_raw</topic>
-      <always_on>true</always_on>
+      <always_on>false</always_on>
       <update_rate>15</update_rate>
       <visualize>false</visualize>
       <camera>
@@ -278,7 +278,7 @@
     <gazebo reference="line_follower_${prefix}">
       <sensor name="line_follower_${prefix}" type="camera">
         <gz_frame_id>line_follower_${prefix}</gz_frame_id>
-        <always_on>true</always_on>
+        <always_on>false</always_on>
         <update_rate>100</update_rate>
         <visualize>false</visualize>
         <topic>/line_follower/${prefix}</topic>
