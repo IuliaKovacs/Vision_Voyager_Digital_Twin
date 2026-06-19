@@ -8,7 +8,7 @@ from launch_ros.actions import Node
 import xacro
 
 def generate_launch_description():
-    # 1. Configurații și Căi
+
     pkg_name = 'vision_voyager_description'
     
     xacro_file = os.path.join(get_package_share_directory(pkg_name), 'urdf', 'vision_voyager.urdf.xacro')
@@ -16,7 +16,7 @@ def generate_launch_description():
     pkg_description = get_package_share_directory('vision_voyager_description')
     world_file = os.path.join(pkg_description, 'worlds', 'world_with_objects.world')
 
-    # 2. Nod: Robot State Publisher (Publică structura robotului)
+
     node_robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
@@ -27,14 +27,12 @@ def generate_launch_description():
         }]
     )
 
-    # 3. Gazebo Sim (Lansare simulator)
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
             get_package_share_directory('ros_gz_sim'), 'launch', 'gz_sim.launch.py')]),
         launch_arguments={'gz_args': [f'-r ', world_file]}.items(),
     )
 
-    # 4. Nod: Spawn Robot (Pune robotul în Gazebo)
     spawn_entity = Node(
         package='ros_gz_sim',
         executable='create',
@@ -48,8 +46,7 @@ def generate_launch_description():
         output='screen'
     )
 
-    # 5. Nod: ROS-GZ Bridge (Puntea pentru comenzi)
-    # Acesta conectează topicul ROS 2 (/cmd_vel) cu cel de Gazebo
+
     bridge = Node(
     package='ros_gz_bridge',
     executable='parameter_bridge',
